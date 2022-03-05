@@ -45,7 +45,9 @@ void FLoadSlotInfosTask::DoWork()
 	LoadedSlots.Reserve(LoadedFiles.Num());
 	for (const auto& File : LoadedFiles)
 	{
-		LoadedSlots.Add(File.CreateAndDeserializeInfo(Manager));
+		USlotInfo* Slot = File.CreateAndDeserializeInfo(Manager);
+		Slot->AddToRoot();
+		LoadedSlots.Add(Slot);
 	}
 
 	if (!bLoadingSingleInfo && bSortByRecent)
@@ -61,6 +63,7 @@ void FLoadSlotInfosTask::AfterFinish()
 	for(auto& Slot : LoadedSlots)
 	{
 		Slot->ClearInternalFlags(EInternalObjectFlags::Async);
+		Slot->RemoveFromRoot();
 	}
 	Delegate.ExecuteIfBound(LoadedSlots);
 }
